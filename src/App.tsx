@@ -6,6 +6,7 @@ import treasureChest from './assets/treasure_opened.png';
 import skeletonChest from './assets/treasure_opened_skeleton.png';
 import chestOpenSound from './audios/chest_open.mp3';
 import evilLaughSound from './audios/chest_open_with_evil_laugh.mp3';
+import keyCursor from './assets/key.png';
 
 interface Box {
   id: number;
@@ -39,7 +40,13 @@ export default function App() {
 
   const openBox = (boxId: number) => {
     if (gameEnded) return;
-    
+
+    // Play the chest opening sound (evil laugh for skeleton) only for a chest that is still closed
+    const targetBox = boxes.find(box => box.id === boxId);
+    if (targetBox && !targetBox.isOpen) {
+      new Audio(targetBox.hasTreasure ? chestOpenSound : evilLaughSound).play();
+    }
+
     setBoxes(prevBoxes => {
       const updatedBoxes = prevBoxes.map(box => {
         if (box.id === boxId && !box.isOpen) {
@@ -91,6 +98,8 @@ export default function App() {
               <motion.div
                 key={box.id}
                 className="flex flex-col items-center cursor-pointer"
+                // Show the key cursor only on chests that are still closed
+                style={box.isOpen ? undefined : { cursor: `url(${keyCursor}), pointer` }}
                 whileHover={{ scale: box.isOpen ? 1 : 1.05 }}
                 whileTap={{ scale: box.isOpen ? 1 : 0.95 }}
                 onClick={() => openBox(box.id)}
